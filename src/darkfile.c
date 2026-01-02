@@ -16,7 +16,7 @@
 #include <ctype.h>
 #include <limits.h>
 
-#define TOOL_VERSION "1.0 (beta)"
+#define TOOL_VERSION "1.1 (Beta)"
 #define TOOL_COMPANY "Dark Script Studio"
 #define TOOL_AUTHOR  "Mohammad Tanvir"
 #define BUILD_DATE   __DATE__
@@ -330,6 +330,7 @@ void process_dir(const char *src_base, const char *curr_src, const char *dst_bas
     closedir(dir);
 }
 
+// --- Modified Scan: Includes Live Progress ---
 void scan_recursive(const char *path) {
     DIR *dir = opendir(path);
     if (!dir) return;
@@ -346,6 +347,14 @@ void scan_recursive(const char *path) {
             atomic_fetch_add(&total_files, 1);
             atomic_fetch_add(&total_bytes, st.st_size);
             if (CURRENT_MODE == MODE_ORGANIZE) get_category(entry->d_name, 1, st.st_size);
+
+            // LIVE UPDATE: Print progress every 50 files
+            if (atomic_load(&total_files) % 50 == 0) {
+                printf("\r\033[K[SCAN] Found: %lu files | Size: %.2f MB", 
+                       atomic_load(&total_files), 
+                       (double)atomic_load(&total_bytes)/(1024*1024));
+                fflush(stdout);
+            }
         }
     }
     closedir(dir);
@@ -448,8 +457,13 @@ int main(int argc, char *argv[]) {
         printf("[ERROR] Recursion: Destination is inside Source.\n"); return 1;
     }
 
-    printf("Scanning %s...\n",src);
+    printf("Scanning %s...\n", src);
+    printf("\033[?25l"); // Hide cursor during scan
+
     scan_recursive(src);
+    
+    printf("\033[?25h"); // Show cursor after scan
+    printf("\n"); // Newline to separate scan progress from summary
     
     if (CURRENT_MODE == MODE_ORGANIZE) {
         printf("\n--- ORGANIZE ANALYSIS ---\n");
