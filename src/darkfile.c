@@ -28,9 +28,12 @@
     #include <windows.h>
     #define PATH_SEP '\\'
 #else
-    #include <sys/sendfile.h>
+    #ifdef __linux__
+        #include <sys/sendfile.h>
+    #endif
     #define PATH_SEP '/'
 #endif
+
 
 #define QUEUE_SIZE 32768
 #define BUFFER_SIZE (256 * 1024)
