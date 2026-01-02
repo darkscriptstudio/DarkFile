@@ -48,7 +48,7 @@
 Run the automated installer script directly from your terminal:
 
 ```bash
-git clone [https://github.com/darkscriptstudio/DarkFile.git](https://github.com/darkscriptstudio/DarkFile.git)
+git clone https://github.com/darkscriptstudio/DarkFile.git
 cd DarkFile
 chmod +x install.sh
 ./install.sh
